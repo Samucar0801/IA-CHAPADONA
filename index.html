@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>IA Chapadona</title>
+  </head>
+  <body>
+    <div class="container">
+      <h1>IA CHAPADONA</h1>
+      <p class="description">
+        A IA mais doida da internet! Faça uma pergunta e receba uma resposta
+        completamente aleatória!
+      </p>
+
+      <div class="chat-area" id="chatArea">
+        <div class="ia-message">
+          E aí, meu consagrado! Tô na maior viagem cósmica aqui! Me pergunta
+          qualquer parada que eu respondo na maior nóia!
+        </div>
+      </div>
+
+      <div class="input-area">
+        <input
+          type="text"
+          id="userInput"
+          placeholder="Digite sua pergunta..."
+        />
+        <button id="sendButton">Enviar</button>
+      </div>
+    </div>
+
+    <script>
+      async function enviarMensagem() {
+        const input = document.getElementById("userInput");
+        const chatArea = document.getElementById("chatArea");
+
+        if (input.value.trim() !== "") {
+          const userMessageText = input.value;
+          input.value = "";
+
+          const userMessage = document.createElement("div");
+          userMessage.className = "user-message";
+          userMessage.textContent = userMessageText;
+          chatArea.appendChild(userMessage);
+
+          const typingMessage = document.createElement("div");
+          typingMessage.className = "ia-message";
+          typingMessage.textContent = "Chapadona está digitando...";
+          chatArea.appendChild(typingMessage);
+          chatArea.scrollTop = chatArea.scrollHeight;
+
+          try {
+            // Usando a URL relativa para evitar problemas de CORS
+            const response = await fetch("/chat", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ message: userMessageText }),
+            });
+
+            if (!response.ok) {
+              throw new Error(`Erro de servidor: ${response.status}`);
+            }
+
+            const data = await response.json();
+            chatArea.removeChild(typingMessage);
+
+            const iaMessage = document.createElement("div");
+            iaMessage.className = "ia-message";
+            iaMessage.textContent = data.reply;
+            chatArea.appendChild(iaMessage);
+            chatArea.scrollTop = chatArea.scrollHeight;
+          } catch (error) {
+            console.error("Erro ao chamar a API:", error);
+            chatArea.removeChild(typingMessage);
+
+            const errorMessage = document.createElement("div");
+            errorMessage.className = "ia-message";
+            errorMessage.textContent =
+              "Ops! Algo deu errado. Tenta de novo mais tarde, meu consagrado!";
+            chatArea.appendChild(errorMessage);
+            chatArea.scrollTop = chatArea.scrollHeight;
+          }
+        }
+      }
+
+      // Adicionar eventos para enviar mensagem
+      document.getElementById("sendButton").addEventListener("click", enviarMensagem);
+      document.getElementById("userInput").addEventListener("keypress", function(e) {
+        if (e.key === "Enter") {
+          enviarMensagem();
+        }
+      });
+    </script>
+  </body>
+</html>
